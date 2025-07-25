@@ -11,6 +11,7 @@ import com.example.likesystem.service.BlogService;
 import com.example.likesystem.mapper.BlogMapper;
 import com.example.likesystem.service.ThumbService;
 import com.example.likesystem.service.UserService;
+import com.example.likesystem.util.RedisKeyUtil;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.context.annotation.Lazy;
@@ -68,7 +69,8 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog>
         if (ObjUtil.isNotEmpty(loginUser)) {
             List<Object> blogIdList = blogList.stream().map(blog -> blog.getId().toString()).collect(Collectors.toList());
             //获取点赞
-            List<Object> thumbList = redisTemplate.opsForHash().multiGet(ThumbConstant.USER_THUMB_KEY_PREFIX + loginUser.getId(), blogIdList);
+            String key = RedisKeyUtil.getUserThumbKey(loginUser.getId());
+            List<Object> thumbList = redisTemplate.opsForHash().multiGet(key, blogIdList);
             for (int i = 0; i < thumbList.size(); i++) {
                 if (thumbList.get(i) == null) {
                     continue;
